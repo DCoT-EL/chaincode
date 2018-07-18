@@ -203,7 +203,7 @@ func (t *DcotWorkflowChaincode) requestTrade(stub shim.ChaincodeStubInterface, c
 	var amount int
 	var err error
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
 		return shim.Error("Caller not a member of Importer Org. Access denied.")
 	}
@@ -303,7 +303,7 @@ func (t *DcotWorkflowChaincode) requestLC(stub shim.ChaincodeStubInterface, crea
 	var letterOfCredit *LetterOfCredit
 	var err error
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
 		return shim.Error("Caller not a member of Importer Org. Access denied.")
 	}
@@ -373,7 +373,7 @@ func (t *DcotWorkflowChaincode) issueLC(stub shim.ChaincodeStubInterface, creato
 	var letterOfCredit *LetterOfCredit
 	var err error
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
 		return shim.Error("Caller not a member of Importer Org. Access denied.")
 	}
@@ -908,7 +908,7 @@ func (t *DcotWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, cr
 	var tradeAgreement *TradeAgreement
 	var err error
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
 		return shim.Error("Caller not a member of Importer Org. Access denied.")
 	}
@@ -1313,7 +1313,7 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 		}
 		balanceKey = expBalKey
 	} else if entity == "importer" {
-		// Access control: Only an Importer Org member can invoke this transaction
+		// Access control: Only an DCOT operatorcan invoke this transaction
 		if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
 			return shim.Error("Caller not a member of Importer Org. Access denied.")
 		}
@@ -1343,7 +1343,7 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1361,7 +1361,7 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1374,7 +1374,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1387,7 +1387,7 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1400,7 +1400,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1413,7 +1413,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1426,7 +1426,7 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1438,7 +1438,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
@@ -1450,7 +1450,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 
-	// Access control: Only an Importer Org member can invoke this transaction
+	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}

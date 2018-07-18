@@ -75,10 +75,10 @@ func getPaymentKey(stub shim.ChaincodeStubInterface, tradeID string) (string, er
 */
 
 func getCOCKey(stub shim.ChaincodeStubInterface, custodyId string) (string, error) {
-	elKey, err := stub.CreateCompositeKey("ChainOfCustody", []string{custodyId})
+	cocKey, err := stub.CreateCompositeKey("ChainOfCustody", []string{custodyId})
 	if err != nil {
 		return "", err
 	} else {
-		return elKey, nil
+		return cocKey, nil
 	}
 }
