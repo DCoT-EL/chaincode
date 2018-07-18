@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"github.com/official gerrit/hyperledger/fabric/core/chaincode/shim/crypto/attr"
 	"crypto/x509"
 	"fmt"
 
@@ -44,6 +43,7 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 
 	return mspid, cert.Issuer.CommonName, nil
 }
+
 /*
 // For now, just hardcode an ACL
 // We will support attribute checks in an upgrade
@@ -77,7 +77,7 @@ func isInvokerOperator(stub shim.ChaincodeStubInterface, attrName string) (bool,
 	attrValue, found, err = cid.getGetAttributeValue(stub, attrName)
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
-		return false ,"", err
+		return false, "", err
 	}
 	return found, attrValue, nil
 }

@@ -24,6 +24,8 @@ import (
 	"github.com/rs/xid"
 )
 
+//var logger = shim.NewLogger("dcot-chaincode")
+
 // DcotWorkflowChaincode implementation
 type DcotWorkflowChaincode struct {
 	testMode bool
