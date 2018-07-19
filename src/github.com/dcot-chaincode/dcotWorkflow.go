@@ -34,7 +34,7 @@ type DcotWorkflowChaincode struct {
 func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("Initializing Chain of Custody")
 	_, args := stub.GetFunctionAndParameters()
-	var err error
+	//var err error
 
 	// Upgrade Mode 1: leave ledger state as it was
 	if len(args) == 0 {
@@ -92,7 +92,8 @@ func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respon
 }
 
 func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-	var creatorOrg, creatorCertIssuer, attrValue string
+	var creatorOrg, creatorCertIssuer string
+	//var attrValue string
 	var err error
 	var isEnabled bool
 
@@ -106,7 +107,7 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 		}
 		fmt.Printf("DcotWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
 
-		isEnabled, attrValue, err = isInvokerOperator(stub, "dcot-operator")
+		isEnabled, _, err = isInvokerOperator(stub, "dcot-operator")
 		if err != nil {
 			fmt.Errorf("Error getting attribute info: %s\n", err.Error())
 			return shim.Error(err.Error())
@@ -1344,20 +1345,22 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
-
+	var err error
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
 
 	//Check Args size is correct!!!
-	var cocKey string
-	cocKey, err = getCOCKey(stub, xid.New())
+	//var cocKey string
+	guid := xid.New()
+	_, err = getCOCKey(stub, guid.String())
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 	//TODO
-	return Shim.Success(nil)
+
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1370,7 +1373,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1383,7 +1386,7 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1396,7 +1399,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1409,7 +1412,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1422,7 +1425,7 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1435,7 +1438,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
@@ -1447,7 +1450,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
@@ -1459,7 +1462,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 
 	//Check Args size is correct!!!
 
-	return Shim.Success(nil)
+	return shim.Success(nil)
 }
 
 func main() {

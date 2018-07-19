@@ -29,7 +29,7 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	var err error
 	var cert *x509.Certificate
 
-	mspid, err = cid.getGetMSPID(stub)
+	mspid, err = cid.GetMSPID(stub)
 	if err != nil {
 		fmt.Printf("Error getting MSP identity: %s\n", err.Error())
 		return "", "", err
@@ -74,7 +74,7 @@ func isInvokerOperator(stub shim.ChaincodeStubInterface, attrName string) (bool,
 	var attrValue string
 	var err error
 
-	attrValue, found, err = cid.getGetAttributeValue(stub, attrName)
+	attrValue, found, err = cid.GetAttributeValue(stub, attrName)
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
 		return false, "", err
