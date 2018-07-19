@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
+//Reference for cid library here https://github.com/hyperledger/fabric/blob/master/core/chaincode/lib/cid/README.md
 package main
 
 import (
