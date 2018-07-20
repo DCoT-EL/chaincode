@@ -1346,11 +1346,10 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
 	var err error
-	// Access control: Only an DCOT operatorcan invoke this transaction
+	// Access control: Only an DCOT operator can invoke this transaction
 	if !t.testMode && !isEnabled {
 		return shim.Error("Caller is not a DCOT operator.")
 	}
-
 	//Check Args size is correct!!!
 	//var cocKey string
 	guid := xid.New()
