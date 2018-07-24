@@ -15,6 +15,13 @@ if [ "$2" != "" ]; then
 	OPERATION='upgrade'
 fi
 echo "Use $HOST as HOST for HLF"
+if [ -d $FABRIC_DIR/chaincode/go/dcot-chaincode ]   # for file "if [-f /home/rama/file]" 
+then 
+    echo "$FABRIC_DIR/chaincode/go/dcot-chaincode dir IS present"
+else
+     echo "$FABRIC_DIR/chaincode/go/dcot-chaincode dir NOT present"
+	 cp -R ./src/github.com/dcot-chaincode $FABRIC_DIR/chaincode/go
+fi
 cd src/github.com/dcot-chaincode
 go get github.com/hyperledger/fabric/core/chaincode/lib/cid
 go get github.com/hyperledger/fabric/core/chaincode/shim
