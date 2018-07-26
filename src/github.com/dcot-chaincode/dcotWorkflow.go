@@ -22,6 +22,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/rs/xid"
+	
 )
 
 //var logger = shim.NewLogger("dcot-chaincode")
@@ -93,7 +94,7 @@ func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respon
 }
 
 func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-	var creatorOrg, creatorCertIssuer string
+	var creatorOrg, creatorID string
 	//var attrValue string
 	var err error
 	var isEnabled bool
@@ -101,12 +102,12 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 	fmt.Println("DcotWorkflow Invoke")
 
 	if !t.testMode {
-		creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(stub)
+		creatorOrg, creatorID, err = getTxCreatorInfo(stub)
 		if err != nil {
 			fmt.Errorf("Error extracting creator identity info: %s\n", err.Error())
 			return shim.Error(err.Error())
 		}
-		fmt.Printf("DcotWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
+		fmt.Printf("DcotWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorID)
 
 		isEnabled, _, err = isInvokerOperator(stub, "dcot-operator")
 		if err != nil {
@@ -1345,27 +1346,40 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 */
 
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+	//TODO
+	var commonName string
 	var jsonResp string
 	var chainOfCustody *ChainOfCustody
 	var err error
 	var jsonCOC []byte
 	var COCKey string
+	//var chaincodeStubInterface ChaincodeStubInterface
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	//if !t.testMode && !isEnabled {
 	//	return shim.Error("Caller is not a DCOT operator.")
 	//}
 	//Check Args size is correct!!!
 	//var cocKey string
+	
 	guid := xid.New()
 	COCKey, err = getCOCKey(stub, guid.String())
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+
 	err = json.Unmarshal([]byte(args[0]), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
 	chainOfCustody.Id = guid.String()
+	chainOfCustody.Status = IN_CUSTODY
+	_, commonName, err = getTxCreatorInfo(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	chainOfCustody.DeliveryMan = commonName
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1374,10 +1388,14 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	//TODO
+
+
 	jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
+
 
 func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO

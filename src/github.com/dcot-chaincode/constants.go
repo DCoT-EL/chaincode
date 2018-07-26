@@ -16,6 +16,11 @@ limitations under the License.
 
 package main
 
+const (
+	IN_CUSTODY = "IN_CUSTODY"
+	TRANSFER_PENDING = "TRANSFER_PENDING"
+)
+
 // Key names
 /*
 const (

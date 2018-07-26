@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"crypto/x509"
+	//"crypto/x509"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
@@ -27,7 +27,7 @@ import (
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 	var mspid string
 	var err error
-	var cert *x509.Certificate
+	var id string
 
 	mspid, err = cid.GetMSPID(stub)
 	if err != nil {
@@ -35,13 +35,13 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 		return "", "", err
 	}
 
-	cert, err = cid.GetX509Certificate(stub)
+	id, err = cid.GetID(stub)
 	if err != nil {
 		fmt.Printf("Error getting client certificate: %s\n", err.Error())
 		return "", "", err
 	}
 
-	return mspid, cert.Issuer.CommonName, nil
+	return mspid, id, nil
 }
 
 /*
