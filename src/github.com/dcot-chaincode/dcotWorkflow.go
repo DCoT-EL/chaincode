@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-
+	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/rs/xid"
@@ -38,6 +38,7 @@ func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respon
 
 	// Upgrade Mode 1: leave ledger state as it was
 	if len(args) == 0 {
+		fmt.Print("Args correctly!!!")
 		return shim.Success(nil)
 	}
 
@@ -1344,22 +1345,38 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 */
 
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
-	//TODO
+	var jsonResp string
+	var chainOfCustody *ChainOfCustody
 	var err error
-	// Access control: Only an DCOT operator can invoke this transaction
-	if !t.testMode && !isEnabled {
-		return shim.Error("Caller is not a DCOT operator.")
-	}
+	var jsonCOC []byte
+	var COCKey string
+	// Access control: Only an DCOT operatorcan invoke this transaction
+	//if !t.testMode && !isEnabled {
+	//	return shim.Error("Caller is not a DCOT operator.")
+	//}
 	//Check Args size is correct!!!
 	//var cocKey string
 	guid := xid.New()
-	_, err = getCOCKey(stub, guid.String())
+	COCKey, err = getCOCKey(stub, guid.String())
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	//TODO
-
-	return shim.Success(nil)
+	err = json.Unmarshal([]byte(args[0]), &chainOfCustody)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	chainOfCustody.Id = guid.String()
+	jsonCOC, err = json.Marshal(&chainOfCustody)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState(COCKey, jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
+	fmt.Printf("Query Response:%s\n", jsonResp)
+	return shim.Success([]byte(jsonResp))
 }
 
 func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
