@@ -27,21 +27,26 @@ import (
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 	var mspid string
 	var err error
-	var id string
-
+	var attrValue string
+	var found bool
 	mspid, err = cid.GetMSPID(stub)
 	if err != nil {
 		fmt.Printf("Error getting MSP identity: %s\n", err.Error())
 		return "", "", err
 	}
 
-	id, err = cid.GetID(stub)
+	attrValue, found, err = cid.GetAttributeValue(stub, TOKEN)
 	if err != nil {
-		fmt.Printf("Error getting client certificate: %s\n", err.Error())
+		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
+		return "", "", err
+	}
+	if found == false {
+		fmt.Printf("Error getting Attribute Value NOT FOUND!!!")
+		err.Error()
 		return "", "", err
 	}
 
-	return mspid, id, nil
+	return mspid, attrValue , nil
 }
 
 /*

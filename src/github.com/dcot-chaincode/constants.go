@@ -16,9 +16,16 @@ limitations under the License.
 
 package main
 
+// Status values
 const (
 	IN_CUSTODY = "IN_CUSTODY"
 	TRANSFER_PENDING = "TRANSFER_PENDING"
+	RELEASED = "RELEASED"
+)
+
+// Utilis values
+const (
+		TOKEN = "token"
 )
 
 // Key names
