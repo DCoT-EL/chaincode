@@ -23,7 +23,6 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
-
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 	var mspid string
 	var err error
@@ -39,11 +38,10 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
 		return "", "", err
-	
 	}
 	if found == false {
 		fmt.Printf("Error getting Attribute Value NOT FOUND!!!")
-			//	err.Error()
+	//	err.Error()
 	//	return "", "", err
 	}
 
