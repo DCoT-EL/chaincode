@@ -1574,8 +1574,8 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 
 	//TODO: CHECK ROLE OF CALLER!!!!
 
-	err = shim.SetEvent("commentChain EVENT: ", jsonCOC)
-	if err =! nil {
+	err = stub.SetEvent("commentChain EVENT: ", jsonCOC)
+	if err != nil {
 		return shim.Error(err.Error())
 	}
 
@@ -1718,7 +1718,6 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
-	var jsonResp string
 
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
@@ -1761,8 +1760,8 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	}
 
 	//EVENT created	
-	err = shim.SetEvent("updateDocument EVENT:", jsonCOC )
-	if err =! nil {
+	err = stub.SetEvent("updateDocument EVENT:", jsonCOC )
+	if err != nil {
 		return shim.Error(err.Error())
 	}
 
@@ -1817,7 +1816,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
+	jsonResp = string(jsonCOC)
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	
 	return shim.Success([]byte(jsonResp))}
