@@ -1346,7 +1346,11 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 
 func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	//TODO
+<<<<<<< HEAD
 	//var callerID string
+=======
+	var callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var jsonResp string
 	var chainOfCustody *ChainOfCustody
 	var err error
@@ -1371,6 +1375,7 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+<<<<<<< HEAD
 	if (chainOfCustody.DocumentId == "" || len(chainOfCustody.DocumentId) == 0 ){
 		return shim.Error("initNewChain ERROR: Document ID must not be null or empty string!!")
 
@@ -1384,6 +1389,16 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	//}
 
 	chainOfCustody.DeliveryMan = "admin"    //FIXME!!!! GESTIRE UTENZE PERMESSI!!!!!
+=======
+
+	chainOfCustody.Id = guid.String()
+	chainOfCustody.Status = IN_CUSTODY
+	_, callerID, err = getTxCreatorInfo(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	chainOfCustody.DeliveryMan = callerID
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1395,24 +1410,41 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	//TODO
 
 
+<<<<<<< HEAD
 	//jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
 	jsonResp = string(jsonCOC)
+=======
+	jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 
 func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+<<<<<<< HEAD
 	var COCKey string
+=======
+	var COCKey, callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var err error
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
+<<<<<<< HEAD
 
 
 	if len(args) != 2 {
 		return shim.Error("startTransferAsset_ERROR: this method must want exactly two arguments!!")
 	}
 
+=======
+
+
+	if len(args) != 2 {
+		return shim.Error("startTransferAsset_ERROR: this method must want exactly two arguments!!")
+	}
+
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	COCKey, err = getCOCKey(stub, args[0])
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1432,6 +1464,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	}
 
 	if chainOfCustody.Status != IN_CUSTODY {
+<<<<<<< HEAD
 		return shim.Error("startTransferAsset ERROR : Asset have not status IN_CUSTODY!!")
 	}
 
@@ -1449,6 +1482,18 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	//FIXME SEE UP!!!!
 	if chainOfCustody.DeliveryMan != "admin"{
 	return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
+=======
+		return shim.Error("startTransferAsset_ERROR : Asset have not status IN_CUSTODY!!")
+	}
+
+	_, callerID, err = getTxCreatorInfo(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if callerID != chainOfCustody.DeliveryMan{
+		return shim.Error("startTransferAsset_ERROR : The caller must be the current custodian!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 
 	chainOfCustody.Status = TRANSFER_PENDING
@@ -1462,14 +1507,21 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error(err.Error())
 	}	
+<<<<<<< HEAD
 
 	fmt.Printf(string(jsonCOC))
+=======
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 
 	return shim.Success(nil)
 }
 
 func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+<<<<<<< HEAD
 	var COCKey string
+=======
+	var COCKey, callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var err error
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
@@ -1482,7 +1534,11 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	//}
 	//Check Args size is correct!!!
 	if len(args) != 1 {
+<<<<<<< HEAD
 		return shim.Error("completeTrasfer ERROR: this method must want exactly one argument!!")
+=======
+		return shim.Error("startTransferAsset_ERROR: this method must want exactly one argument!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1501,15 +1557,23 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	}
 
 	if chainOfCustody.Status !=TRANSFER_PENDING {
+<<<<<<< HEAD
 		return shim.Error("completeTrasfer ERROR : Asset have not status TRANSFER_PENDING!!")
 	}
 
 	/*_, callerID, err = getTxCreatorInfo(stub)
+=======
+		return shim.Error("startTransferAsset_ERROR : Asset have not status TRANSFER_PENDING!!")
+	}
+
+	_, callerID, err = getTxCreatorInfo(stub)
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	if callerID != chainOfCustody.DeliveryMan{
+<<<<<<< HEAD
 		return shim.Error("completeTrasfer ERROR : The caller must be the current custodian!!")
 	}
 	*/
@@ -1520,6 +1584,10 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	}
 	
 	
+=======
+		return shim.Error("startTransferAsset_ERROR : The caller must be the current custodian!!")
+	}
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	chainOfCustody.Status = IN_CUSTODY
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
@@ -1584,7 +1652,11 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 }
 
 func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+<<<<<<< HEAD
 	var COCKey string
+=======
+	var COCKey, callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var err error
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
@@ -1597,7 +1669,11 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	//}
 	//Check Args size is correct!!!
 	if len(args) != 1 {
+<<<<<<< HEAD
 		return shim.Error("cancelTrasfer ERROR: this method must want exactly one argument!!")
+=======
+		return shim.Error("startTransferAsset_ERROR: this method must want exactly one argument!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1616,22 +1692,32 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	}
 
 	if chainOfCustody.Status !=TRANSFER_PENDING {
+<<<<<<< HEAD
 		return shim.Error("cancelTrasfer ERROR : Asset have not status TRANSFER_PENDING!!")
 	}
 
 	/*
+=======
+		return shim.Error("startTransferAsset_ERROR : Asset have not status TRANSFER_PENDING!!")
+	}
+
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	_, callerID, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	if callerID != chainOfCustody.DeliveryMan{
+<<<<<<< HEAD
 		return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian!!")
 	} 
 	*/
 
 	if chainOfCustody.DeliveryMan != "admin"{
 		return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian!!")
+=======
+		return shim.Error("startTransferAsset_ERROR : The caller must be the current custodian!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 	chainOfCustody.Status = IN_CUSTODY
 	jsonCOC, err = json.Marshal(&chainOfCustody)
@@ -1648,7 +1734,11 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 }
 
 func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+<<<<<<< HEAD
 	var COCKey string
+=======
+	var COCKey, callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var err error
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
@@ -1661,7 +1751,11 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	//}
 	//Check Args size is correct!!!
 	if len(args) != 1 {
+<<<<<<< HEAD
 		return shim.Error("terminateChain ERROR: this method must want exactly one argument!!")
+=======
+		return shim.Error("startTransferAsset_ERROR: this method must want exactly one argument!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1680,16 +1774,23 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	}
 
 	if chainOfCustody.Status != IN_CUSTODY {
+<<<<<<< HEAD
 		return shim.Error("terminateChain ERROR : Asset have not status IN_CUSTODY!!")
 	}
 
 	/*
+=======
+		return shim.Error("startTransferAsset_ERROR : Asset have not status IN_CUSTODY!!")
+	}
+
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	_, callerID, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	if callerID != chainOfCustody.DeliveryMan{
+<<<<<<< HEAD
 		return shim.Error("terminateChain ERROR : The caller must be the current custodian!!")
 	}
 	*/
@@ -1699,6 +1800,11 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 		return shim.Error("terminateChain ERROR : The caller must be the current custodian!!")
 	}
 	chainOfCustody.Status = RELEASED
+=======
+		return shim.Error("startTransferAsset_ERROR : The caller must be the current custodian!!")
+	}
+	chainOfCustody.Status = IN_RELEASED
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1769,12 +1875,19 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	return shim.Success(nil)
 }
 func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+<<<<<<< HEAD
 	var COCKey string
+=======
+	var COCKey, callerID string
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	var err error
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
+<<<<<<< HEAD
 	var jsonResp string
+=======
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	//TODO
 
 	// Access control: Only an DCOT operatorcan invoke this transaction
@@ -1783,7 +1896,11 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	//}
 	//Check Args size is correct!!!
 	if len(args) != 1 {
+<<<<<<< HEAD
 		return shim.Error("getAssetDetails ERROR: this method must want exactly one argument!!")
+=======
+		return shim.Error("startTransferAsset_ERROR: this method must want exactly one argument!!")
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1801,23 +1918,34 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 		return shim.Error(err.Error())
 	}
 
+<<<<<<< HEAD
 	/*
+=======
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	_, callerID, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+<<<<<<< HEAD
 	*/
 
 	//FIXME
 	if chainOfCustody.DeliveryMan != "admin" {
 		return shim.Error("getAssetDetails ERROR: The caller haven't a role compatible or admin privileges")
 	}
+=======
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+<<<<<<< HEAD
 	jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
+=======
+	
+	jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	
 	return shim.Success([]byte(jsonResp))}

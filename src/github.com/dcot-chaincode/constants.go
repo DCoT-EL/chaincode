@@ -23,9 +23,15 @@ const (
 	RELEASED = "RELEASED"
 )
 
+<<<<<<< HEAD
 // Utilis values //FIXME!!!!!
 const (
 		TOKEN = "admin"
+=======
+// Utilis values
+const (
+		TOKEN = "token"
+>>>>>>> 5e2b8b8ea2722174c932f4f4c868cc45fb052a64
 )
 
 // Key names
