@@ -16,6 +16,18 @@ limitations under the License.
 
 package main
 
+// Status values
+const (
+	IN_CUSTODY = "IN_CUSTODY"
+	TRANSFER_PENDING = "TRANSFER_PENDING"
+	RELEASED = "RELEASED"
+)
+
+// Utilis values //FIXME!!!!!
+const (
+		TOKEN = "admin"
+)
+
 // Key names
 /*
 const (
