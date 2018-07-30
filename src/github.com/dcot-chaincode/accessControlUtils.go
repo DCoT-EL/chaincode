@@ -39,10 +39,11 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
 		return "", "", err
+	
 	}
 	if found == false {
-		fmt.Printf("Error getting Attribute Value NOT FOUND!!!")
-	//	err.Error()
+		fmt.Printf("Error getting Attribute Value NOT FOUND!!!"
+			//	err.Error()
 	//	return "", "", err
 	}
 
