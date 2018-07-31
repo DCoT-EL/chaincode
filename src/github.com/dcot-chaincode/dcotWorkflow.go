@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"bytes"
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -1405,7 +1406,7 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 		return shim.Error(err.Error())
 	}
 
-	fmt.Printf("initNewChain EVENT: " +string(jsonCOC))
+	fmt.Printf("initNewChain EVENT: ", jsonCOC)
 
 	return shim.Success([]byte(jsonResp))
 }
@@ -1476,7 +1477,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("startTransfer EVENT: " +string(jsonCOC))
+	fmt.Printf("startTransfer EVENT: " , jsonCOC)
 
 
 	return shim.Success(nil)
@@ -1549,7 +1550,7 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("completeTrasfer EVENT: " +string(jsonCOC))
+	fmt.Printf("completeTrasfer EVENT: ", jsonCOC)
 	
 	return shim.Success(nil)
 }
@@ -1598,7 +1599,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("commentChain EVENT: " +string(jsonCOC))
+	fmt.Printf("commentChain EVENT: ", jsonCOC)
 
 	return shim.Success(nil)
 }
@@ -1667,7 +1668,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("cancelTrasfer EVENT: " +string(jsonCOC))
+	fmt.Printf("cancelTrasfer EVENT: ", jsonCOC)
 
 
 	return shim.Success(nil)
@@ -1739,7 +1740,7 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("terminateChain EVENT: " +string(jsonCOC))
+	fmt.Printf("terminateChain EVENT: ", jsonCOC)
 
 	return shim.Success(nil)
 }
@@ -1848,22 +1849,55 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
+	//jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
+	jsonResp = string(jsonCOC)
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	
 	return shim.Success([]byte(jsonResp))}
 
 func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
-	//TODO
-
+	var COCKey string
+	var err error
+	var chainOfCustody *ChainOfCustody
+	var chainOfCustodyBytes []byte
+	var jsonCOC []byte
+	var jsonResp string
+	//var history *HistoryQueryIteratorInterface
 	// Access control: Only an DCOT operatorcan invoke this transaction
-	if !t.testMode && !isEnabled {
-		return shim.Error("Caller is not a DCOT operator.")
+	//if !t.testMode && !isEnabled {
+	//	return shim.Error("Caller is not a DCOT operator.")
+	//}
+
+	if len(args) != 1 {
+		return shim.Error("getChainOfEvents ERROR: this method must want exactly one argument!!")
 	}
 
-	//Check Args size is correct!!!
+	COCKey, err2 := getCOCKey(stub, args[0])
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
-	return shim.Success(nil)
+	historyResponse, err = stub.GetHistoryForKey(COCKey)
+	if err2 != nil {
+		return shim.Error(err2.Error())
+	}
+	var buffer bytes.Buffer
+	bArrayMemberAlreadyWritten := false
+	for historyResponse.HashNext(){
+		jsonResp,
+			err2 := resultsIterator.Next()
+		if err2 != nil {
+			return shim.Error(err2.Error())
+		}
+		if bArrayMemberAlreadyWritten == true{
+			buffer.WriteString(",")
+		}
+		
+	}
+
+
+
+	return shim.Success(nil) 
 }
 
 func main() {
