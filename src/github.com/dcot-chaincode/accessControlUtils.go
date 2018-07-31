@@ -34,7 +34,7 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 		return "", "", err
 	}
 
-	attrValue, found, err = cid.GetAttributeValue(stub, TOKEN)
+	attrValue, found, err = cid.GetAttributeValue(stub, "TOKEN")
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
 		return "", "", err

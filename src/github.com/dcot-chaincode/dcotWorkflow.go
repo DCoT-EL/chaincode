@@ -1398,6 +1398,15 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	//jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
 	jsonResp = string(jsonCOC)
 	fmt.Printf("Query Response:%s\n", jsonResp)
+
+
+	err = stub.SetEvent("initNewChain EVENT: ", jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Printf("initNewChain EVENT: " +string(jsonCOC))
+
 	return shim.Success([]byte(jsonResp))
 }
 
@@ -1410,7 +1419,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 
 
 	if len(args) != 2 {
-		return shim.Error("startTransferAsset_ERROR: this method must want exactly two arguments!!")
+		return shim.Error("startTransfer ERROR: this method must want exactly two arguments!!")
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1463,7 +1472,12 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}	
 
-	fmt.Printf(string(jsonCOC))
+	err = stub.SetEvent("startTransfer EVENT: ", jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	fmt.Printf("startTransfer EVENT: " +string(jsonCOC))
+
 
 	return shim.Success(nil)
 }
@@ -1530,7 +1544,13 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}	
-
+	
+	err = stub.SetEvent("completeTrasfer EVENT: ", jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	fmt.Printf("completeTrasfer EVENT: " +string(jsonCOC))
+	
 	return shim.Success(nil)
 }
 
@@ -1578,7 +1598,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
+	fmt.Printf("commentChain EVENT: " +string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1643,6 +1663,12 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error(err.Error())
 	}	
+	err = stub.SetEvent("cancelTrasfer EVENT: ", jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	fmt.Printf("cancelTrasfer EVENT: " +string(jsonCOC))
+
 
 	return shim.Success(nil)
 }
@@ -1708,6 +1734,12 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}	
+
+	err = stub.SetEvent("terminateChain EVENT: ", jsonCOC)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	fmt.Printf("terminateChain EVENT: " +string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1816,7 +1848,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	jsonResp = string(jsonCOC)
+	jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	
 	return shim.Success([]byte(jsonResp))}
