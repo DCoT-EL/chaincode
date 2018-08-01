@@ -17,13 +17,15 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"bytes"
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/rs/xid"
 )
+
+var logger = shim.NewLogger("dcot-chaincode-log")
 
 //var logger = shim.NewLogger("dcot-chaincode")
 
@@ -33,13 +35,14 @@ type DcotWorkflowChaincode struct {
 }
 
 func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	fmt.Println("Initializing Chain of Custody")
+	logger.Info("Initializing Chain of Custody")
+	logger.SetLevel(shim.LogDebug)
 	_, args := stub.GetFunctionAndParameters()
 	//var err error
 
 	// Upgrade Mode 1: leave ledger state as it was
 	if len(args) == 0 {
-		fmt.Print("Args correctly!!!")
+		logger.Info("Args correctly!!!")
 		return shim.Success(nil)
 	}
 
@@ -62,30 +65,30 @@ func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respon
 		// Type checks
 		_, err = strconv.Atoi(string(args[2]))
 		if err != nil {
-			fmt.Printf("Exporter's account balance must be an integer. Found %s\n", args[2])
+			logger.Info("Exporter's account balance must be an integer. Found %s\n", args[2])
 			return shim.Error(err.Error())
 		}
 		_, err = strconv.Atoi(string(args[5]))
 		if err != nil {
-			fmt.Printf("Importer's account balance must be an integer. Found %s\n", args[5])
+			logger.Info("Importer's account balance must be an integer. Found %s\n", args[5])
 			return shim.Error(err.Error())
 		}
 
-		fmt.Printf("Exporter: %s\n", args[0])
-		fmt.Printf("Exporter's Bank: %s\n", args[1])
-		fmt.Printf("Exporter's Account Balance: %s\n", args[2])
-		fmt.Printf("Importer: %s\n", args[3])
-		fmt.Printf("Importer's Bank: %s\n", args[4])
-		fmt.Printf("Importer's Account Balance: %s\n", args[5])
-		fmt.Printf("Carrier: %s\n", args[6])
-		fmt.Printf("Regulatory Authority: %s\n", args[7])
+		logger.Info("Exporter: %s\n", args[0])
+		logger.Info("Exporter's Bank: %s\n", args[1])
+		logger.Info("Exporter's Account Balance: %s\n", args[2])
+		logger.Info("Importer: %s\n", args[3])
+		logger.Info("Importer's Bank: %s\n", args[4])
+		logger.Info("Importer's Account Balance: %s\n", args[5])
+		logger.Info("Carrier: %s\n", args[6])
+		logger.Info("Regulatory Authority: %s\n", args[7])
 
 		// Map participant identities to their roles on the ledger
 		roleKeys := []string{expKey, ebKey, expBalKey, impKey, ibKey, impBalKey, carKey, raKey}
 		for i, roleKey := range roleKeys {
 			err = stub.PutState(roleKey, []byte(args[i]))
 			if err != nil {
-				fmt.Errorf("Error recording key %s: %s\n", roleKey, err.Error())
+				logger.Error("Error recording key %s: %s\n", roleKey, err.Error())
 				return shim.Error(err.Error())
 			}
 		}
@@ -99,19 +102,19 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 	var err error
 	var isEnabled bool
 
-	fmt.Println("DcotWorkflow Invoke")
+	logger.Info("DcotWorkflow Invoke")
 
 	if !t.testMode {
 		creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(stub)
 		if err != nil {
-			fmt.Errorf("Error extracting creator identity info: %s\n", err.Error())
+			logger.Error("Error extracting creator identity info: %s\n", err.Error())
 			return shim.Error(err.Error())
 		}
-		fmt.Printf("DcotWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
+		logger.Info("DcotWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
 
 		isEnabled, _, err = isInvokerOperator(stub, "dcot-operator")
 		if err != nil {
-			fmt.Errorf("Error getting attribute info: %s\n", err.Error())
+			logger.Error("Error getting attribute info: %s\n", err.Error())
 			return shim.Error(err.Error())
 		}
 	}
@@ -238,7 +241,7 @@ func (t *DcotWorkflowChaincode) requestTrade(stub shim.ChaincodeStubInterface, c
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Trade %s request recorded\n", args[0])
+	logger.Info("Trade %s request recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -282,7 +285,7 @@ func (t *DcotWorkflowChaincode) acceptTrade(stub shim.ChaincodeStubInterface, cr
 	}
 
 	if tradeAgreement.Status == ACCEPTED {
-		fmt.Printf("Trade %s already accepted", args[0])
+		logger.Info("Trade %s already accepted", args[0])
 	} else {
 		tradeAgreement.Status = ACCEPTED
 		tradeAgreementBytes, err = json.Marshal(tradeAgreement)
@@ -295,7 +298,7 @@ func (t *DcotWorkflowChaincode) acceptTrade(stub shim.ChaincodeStubInterface, cr
 			return shim.Error(err.Error())
 		}
 	}
-	fmt.Printf("Trade %s acceptance recorded\n", args[0])
+	logger.Info("Trade %s acceptance recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -365,7 +368,7 @@ func (t *DcotWorkflowChaincode) requestLC(stub shim.ChaincodeStubInterface, crea
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Letter of Credit request for trade %s recorded\n", args[0])
+	logger.Info("Letter of Credit request for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -405,9 +408,9 @@ func (t *DcotWorkflowChaincode) issueLC(stub shim.ChaincodeStubInterface, creato
 	}
 
 	if letterOfCredit.Status == ISSUED {
-		fmt.Printf("L/C for trade %s already issued", args[0])
+		logger.Info("L/C for trade %s already issued", args[0])
 	} else if letterOfCredit.Status == ACCEPTED {
-		fmt.Printf("L/C for trade %s already accepted", args[0])
+		logger.Info("L/C for trade %s already accepted", args[0])
 	} else {
 		letterOfCredit.Id = args[1]
 		letterOfCredit.ExpirationDate = args[2]
@@ -423,7 +426,7 @@ func (t *DcotWorkflowChaincode) issueLC(stub shim.ChaincodeStubInterface, creato
 			return shim.Error(err.Error())
 		}
 	}
-	fmt.Printf("L/C issuance for trade %s recorded\n", args[0])
+	logger.Info("L/C issuance for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -462,9 +465,9 @@ func (t *DcotWorkflowChaincode) acceptLC(stub shim.ChaincodeStubInterface, creat
 	}
 
 	if letterOfCredit.Status == ACCEPTED {
-		fmt.Printf("L/C for trade %s already accepted", args[0])
+		logger.Info("L/C for trade %s already accepted", args[0])
 	} else if letterOfCredit.Status == REQUESTED {
-		fmt.Printf("L/C for trade %s has not been issued", args[0])
+		logger.Info("L/C for trade %s has not been issued", args[0])
 		return shim.Error("L/C not issued yet")
 	} else {
 		letterOfCredit.Status = ACCEPTED
@@ -478,7 +481,7 @@ func (t *DcotWorkflowChaincode) acceptLC(stub shim.ChaincodeStubInterface, creat
 			return shim.Error(err.Error())
 		}
 	}
-	fmt.Printf("L/C acceptance for trade %s recorded\n", args[0])
+	logger.Info("L/C acceptance for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -520,7 +523,7 @@ func (t *DcotWorkflowChaincode) requestEL(stub shim.ChaincodeStubInterface, crea
 
 	// Verify that the L/C has already been accepted
 	if letterOfCredit.Status != ACCEPTED {
-		fmt.Printf("L/C for trade %s has not been accepted", args[0])
+		logger.Info("L/C for trade %s has not been accepted", args[0])
 		return shim.Error("L/C not accepted yet")
 	}
 
@@ -584,7 +587,7 @@ func (t *DcotWorkflowChaincode) requestEL(stub shim.ChaincodeStubInterface, crea
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Export License request for trade %s recorded\n", args[0])
+	logger.Info("Export License request for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -624,7 +627,7 @@ func (t *DcotWorkflowChaincode) issueEL(stub shim.ChaincodeStubInterface, creato
 
 	// Verify that the E/L has not already been issued
 	if exportLicense.Status == ISSUED {
-		fmt.Printf("E/L for trade %s has already been issued", args[0])
+		logger.Info("E/L for trade %s has already been issued", args[0])
 	} else {
 		exportLicense.Id = args[1]
 		exportLicense.ExpirationDate = args[2]
@@ -639,7 +642,7 @@ func (t *DcotWorkflowChaincode) issueEL(stub shim.ChaincodeStubInterface, creato
 			return shim.Error(err.Error())
 		}
 	}
-	fmt.Printf("Export License issuance for trade %s recorded\n", args[0])
+	logger.Info("Export License issuance for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -674,10 +677,10 @@ func (t *DcotWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterface
 
 	if len(shipmentLocationBytes) != 0 {
 		if string(shipmentLocationBytes) == SOURCE {
-			fmt.Printf("Shipment for trade %s has already been prepared", args[0])
+			logger.Info("Shipment for trade %s has already been prepared", args[0])
 			return shim.Success(nil)
 		} else {
-			fmt.Printf("Shipment for trade %s has passed the preparation stage", args[0])
+			logger.Info("Shipment for trade %s has passed the preparation stage", args[0])
 			return shim.Error("Shipment past the preparation stage")
 		}
 	}
@@ -700,7 +703,7 @@ func (t *DcotWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterface
 
 	// Verify that the E/L has already been issued
 	if exportLicense.Status != ISSUED {
-		fmt.Printf("E/L for trade %s has not been issued", args[0])
+		logger.Info("E/L for trade %s has not been issued", args[0])
 		return shim.Error("E/L not issued yet")
 	}
 
@@ -713,7 +716,7 @@ func (t *DcotWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Shipment preparation for trade %s recorded\n", args[0])
+	logger.Info("Shipment preparation for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -748,11 +751,11 @@ func (t *DcotWorkflowChaincode) acceptShipmentAndIssueBL(stub shim.ChaincodeStub
 	}
 
 	if len(shipmentLocationBytes) == 0 {
-		fmt.Printf("Shipment for trade %s has not been prepared yet", args[0])
+		logger.Info("Shipment for trade %s has not been prepared yet", args[0])
 		return shim.Error("Shipment not prepared yet")
 	}
 	if string(shipmentLocationBytes) != SOURCE {
-		fmt.Printf("Shipment for trade %s has passed the preparation stage", args[0])
+		logger.Info("Shipment for trade %s has passed the preparation stage", args[0])
 		return shim.Error("Shipment past the preparation stage")
 	}
 
@@ -812,7 +815,7 @@ func (t *DcotWorkflowChaincode) acceptShipmentAndIssueBL(stub shim.ChaincodeStub
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Bill of Lading for trade %s recorded\n", args[0])
+	logger.Info("Bill of Lading for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -867,7 +870,7 @@ func (t *DcotWorkflowChaincode) requestPayment(stub shim.ChaincodeStubInterface,
 	}
 
 	if len(shipmentLocationBytes) == 0 {
-		fmt.Printf("Shipment for trade %s has not been prepared yet", args[0])
+		logger.Info("Shipment for trade %s has not been prepared yet", args[0])
 		return shim.Error("Shipment not prepared yet")
 	}
 
@@ -882,16 +885,16 @@ func (t *DcotWorkflowChaincode) requestPayment(stub shim.ChaincodeStubInterface,
 	}
 
 	if len(paymentBytes) != 0 {	// The value doesn't matter as this is a temporary key used as a marker
-		fmt.Printf("Payment request already pending for trade %s\n", args[0])
+		logger.Info("Payment request already pending for trade %s\n", args[0])
 	} else {
 		// Check what has been paid up to this point
-		fmt.Printf("Amount paid thus far for trade %s = %d; total required = %d\n", args[0], tradeAgreement.Payment, tradeAgreement.Amount)
+		logger.Info("Amount paid thus far for trade %s = %d; total required = %d\n", args[0], tradeAgreement.Payment, tradeAgreement.Amount)
 		if tradeAgreement.Amount == tradeAgreement.Payment {	// Payment has already been settled
-			fmt.Printf("Payment already settled for trade %s\n", args[0])
+			logger.Info("Payment already settled for trade %s\n", args[0])
 			return shim.Error("Payment already settled")
 		}
 		if string(shipmentLocationBytes) == SOURCE && tradeAgreement.Payment != 0 {	// Suppress duplicate requests for partial payment
-			fmt.Printf("Partial payment already made for trade %s\n", args[0])
+			logger.Info("Partial payment already made for trade %s\n", args[0])
 			return shim.Error("Partial payment already made")
 		}
 
@@ -900,7 +903,7 @@ func (t *DcotWorkflowChaincode) requestPayment(stub shim.ChaincodeStubInterface,
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-		fmt.Printf("Payment request for trade %s recorded\n", args[0])
+		logger.Info("Payment request for trade %s recorded\n", args[0])
 	}
 	return shim.Success(nil)
 }
@@ -934,7 +937,7 @@ func (t *DcotWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, cr
 	}
 
 	if len(paymentBytes) == 0 {
-		fmt.Printf("No payment request found for trade %s", args[0])
+		logger.Info("No payment request found for trade %s", args[0])
 		return shim.Error("No payment request found")
 	}
 
@@ -971,7 +974,7 @@ func (t *DcotWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, cr
 	}
 
 	if len(shipmentLocationBytes) == 0 {
-		fmt.Printf("Shipment for trade %s has not been prepared yet", args[0])
+		logger.Info("Shipment for trade %s has not been prepared yet", args[0])
 		return shim.Error("Shipment not prepared yet")
 	}
 
@@ -1002,7 +1005,7 @@ func (t *DcotWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, cr
 	tradeAgreement.Payment += paymentAmount
 	expBal += paymentAmount
 	if impBal < paymentAmount {
-		fmt.Printf("Importer's bank balance %d is insufficient to cover payment amount %d\n", impBal, paymentAmount)
+		logger.Info("Importer's bank balance %d is insufficient to cover payment amount %d\n", impBal, paymentAmount)
 	}
 	impBal -= paymentAmount
 
@@ -1027,7 +1030,7 @@ func (t *DcotWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, cr
 	// Delete request key from ledger
 	err = stub.DelState(paymentKey)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Info(err.Error())
 		return shim.Error("Failed to delete payment request from ledger")
 	}
 
@@ -1062,11 +1065,11 @@ func (t *DcotWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubIn
 	}
 
 	if len(shipmentLocationBytes) == 0 {
-		fmt.Printf("Shipment for trade %s has not been prepared yet", args[0])
+		logger.Info("Shipment for trade %s has not been prepared yet", args[0])
 		return shim.Error("Shipment not prepared yet")
 	}
 	if string(shipmentLocationBytes) == args[1] {
-		fmt.Printf("Shipment for trade %s is already in location %s", args[0], args[1])
+		logger.Info("Shipment for trade %s is already in location %s", args[0], args[1])
 	}
 
 	// Write the state to the ledger
@@ -1074,7 +1077,7 @@ func (t *DcotWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubIn
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("Shipment location for trade %s recorded\n", args[0])
+	logger.Info("Shipment location for trade %s recorded\n", args[0])
 
 	return shim.Success(nil)
 }
@@ -1094,7 +1097,7 @@ func (t *DcotWorkflowChaincode) delete(stub shim.ChaincodeStubInterface, creator
 	// Delete the key from the state in ledger
 	err = stub.DelState(key)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Info(err.Error())
 		return shim.Error("Failed to delete state")
 	}
 
@@ -1140,7 +1143,7 @@ func (t *DcotWorkflowChaincode) getTradeStatus(stub shim.ChaincodeStubInterface,
 	}
 
 	jsonResp = "{\"Status\":\"" + tradeAgreement.Status + "\"}"
-	fmt.Printf("Query Response:%s\n", jsonResp)
+	logger.Info("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 
@@ -1183,7 +1186,7 @@ func (t *DcotWorkflowChaincode) getLCStatus(stub shim.ChaincodeStubInterface, cr
 	}
 
 	jsonResp = "{\"Status\":\"" + letterOfCredit.Status + "\"}"
-	fmt.Printf("Query Response:%s\n", jsonResp)
+	logger.Info("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 
@@ -1226,7 +1229,7 @@ func (t *DcotWorkflowChaincode) getELStatus(stub shim.ChaincodeStubInterface, cr
 	}
 
 	jsonResp = "{\"Status\":\"" + exportLicense.Status + "\"}"
-	fmt.Printf("Query Response:%s\n", jsonResp)
+	logger.Info("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 
@@ -1262,7 +1265,7 @@ func (t *DcotWorkflowChaincode) getShipmentLocation(stub shim.ChaincodeStubInter
 	}
 
 	jsonResp = "{\"Location\":\"" + string(shipmentLocationBytes) + "\"}"
-	fmt.Printf("Query Response:%s\n", jsonResp)
+	logger.Info("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 
@@ -1296,7 +1299,7 @@ func (t *DcotWorkflowChaincode) getBillOfLading(stub shim.ChaincodeStubInterface
 		jsonResp = "{\"Error\":\"No record found for " + blKey + "\"}"
 		return shim.Error(jsonResp)
 	}
-	fmt.Printf("Query Response:%s\n", string(billOfLadingBytes))
+	logger.Info("Query Response:%s\n", string(billOfLadingBytes))
 	return shim.Success(billOfLadingBytes)
 }
 
@@ -1340,7 +1343,7 @@ func (t *DcotWorkflowChaincode) getAccountBalance(stub shim.ChaincodeStubInterfa
 		return shim.Error(jsonResp)
 	}
 	jsonResp = "{\"Balance\":\"" + string(balanceBytes) + "\"}"
-	fmt.Printf("Query Response:%s\n", jsonResp)
+	logger.Info("Query Response:%s\n", jsonResp)
 	return shim.Success([]byte(jsonResp))
 }
 */
@@ -1360,19 +1363,18 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	//}
 	//Check Args size is correct!!!
 	//var cocKey string
-	
+
 	guid := xid.New()
 	COCKey, err = getCOCKey(stub, guid.String())
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-
 	err = json.Unmarshal([]byte(args[0]), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	if (chainOfCustody.DocumentId == "" || len(chainOfCustody.DocumentId) == 0 ){
+	if chainOfCustody.DocumentId == "" || len(chainOfCustody.DocumentId) == 0 {
 		return shim.Error("initNewChain ERROR: Document ID must not be null or empty string!!")
 
 	}
@@ -1384,7 +1386,7 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	//	return shim.Error(err.Error())
 	//}
 
-	chainOfCustody.DeliveryMan = "admin"    //FIXME!!!! GESTIRE UTENZE PERMESSI!!!!!
+	chainOfCustody.DeliveryMan = "admin" //FIXME!!!! GESTIRE UTENZE PERMESSI!!!!!
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1395,18 +1397,16 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	}
 	//TODO
 
-
 	//jsonResp = "{\" **** initNewChain complete! ****\":\"" + string(jsonCOC) + "\"} "
 	jsonResp = string(jsonCOC)
-	fmt.Printf("Query Response:%s\n", jsonResp)
-
+	logger.Info("Query Response:%s\n", jsonResp)
 
 	err = stub.SetEvent("initNewChain EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	fmt.Printf("*** initNewChain EVENT: ", string(jsonCOC))
+	logger.Info("*** initNewChain EVENT: ", string(jsonCOC))
 
 	return shim.Success([]byte(jsonResp))
 }
@@ -1417,7 +1417,6 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
-
 
 	if len(args) != 2 {
 		return shim.Error("startTransfer ERROR: this method must want exactly two arguments!!")
@@ -1436,7 +1435,7 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -1449,16 +1448,15 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	//if err != nil {
 	//	return shim.Error(err.Error())
 	//}
-	//fmt.Printf("CALLER_ID :"+ string(callerID) +" . \n")
+	//logger.Info("CALLER_ID :"+ string(callerID) +" . \n")
 
 	//if callerID != chainOfCustody.DeliveryMan{
 	//	return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
 	//}
 
-
 	//FIXME SEE UP!!!!
-	if chainOfCustody.DeliveryMan != "admin"{
-	return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
+	if chainOfCustody.DeliveryMan != "admin" {
+		return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
 	}
 
 	chainOfCustody.Status = TRANSFER_PENDING
@@ -1471,14 +1469,13 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	err = stub.PutState(COCKey, jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
-	}	
+	}
 
 	err = stub.SetEvent("startTransfer EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("*** startTransfer EVENT: " , string(jsonCOC))
-
+	logger.Info("*** startTransfer EVENT: ", string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1510,12 +1507,12 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	if chainOfCustody.Status !=TRANSFER_PENDING {
+	if chainOfCustody.Status != TRANSFER_PENDING {
 		return shim.Error("completeTrasfer ERROR : Asset have not status TRANSFER_PENDING!!")
 	}
 
@@ -1530,11 +1527,10 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	*/
 
 	//FIXME SEE UP!!!
-	if chainOfCustody.DeliveryMan != "admin"{
-	return shim.Error("completeTrasfer ERROR : The caller must be the current custodian!!")
+	if chainOfCustody.DeliveryMan != "admin" {
+		return shim.Error("completeTrasfer ERROR : The caller must be the current custodian!!")
 	}
-	
-	
+
 	chainOfCustody.Status = IN_CUSTODY
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
@@ -1544,14 +1540,14 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 	err = stub.PutState(COCKey, jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
-	}	
-	
+	}
+
 	err = stub.SetEvent("completeTrasfer EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Printf("*** completeTrasfer EVENT: ", string(jsonCOC)) 
-	
+	logger.Info("*** completeTrasfer EVENT: ", string(jsonCOC))
+
 	return shim.Success(nil)
 }
 
@@ -1568,7 +1564,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 
 	//Check Args size is correct!!!
 
-	if len(args) != 2{
+	if len(args) != 2 {
 		return shim.Error("commentChain ERROR: this method must want exactly two argument!!")
 	}
 
@@ -1582,7 +1578,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -1599,7 +1595,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println("*** commentChain EVENT: ", string(jsonCOC))
+	logger.Info("*** commentChain EVENT: ", string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1631,27 +1627,27 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	if chainOfCustody.Status !=TRANSFER_PENDING {
+	if chainOfCustody.Status != TRANSFER_PENDING {
 		return shim.Error("cancelTrasfer ERROR : Asset have not status TRANSFER_PENDING!!")
 	}
 
 	/*
-	_, callerID, err = getTxCreatorInfo(stub)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+		_, callerID, err = getTxCreatorInfo(stub)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
-	if callerID != chainOfCustody.DeliveryMan{
-		return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian!!")
-	} 
+		if callerID != chainOfCustody.DeliveryMan{
+			return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian!!")
+		}
 	*/
 
-	if chainOfCustody.DeliveryMan != "admin"{
+	if chainOfCustody.DeliveryMan != "admin" {
 		return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian!!")
 	}
 	chainOfCustody.Status = IN_CUSTODY
@@ -1663,13 +1659,12 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	err = stub.PutState(COCKey, jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
-	}	
+	}
 	err = stub.SetEvent("cancelTrasfer EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println("*** cancelTrasfer EVENT: ", string(jsonCOC))
-
+	logger.Info("*** cancelTrasfer EVENT: ", string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1701,7 +1696,7 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -1711,18 +1706,18 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	}
 
 	/*
-	_, callerID, err = getTxCreatorInfo(stub)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+		_, callerID, err = getTxCreatorInfo(stub)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
-	if callerID != chainOfCustody.DeliveryMan{
-		return shim.Error("terminateChain ERROR : The caller must be the current custodian!!")
-	}
+		if callerID != chainOfCustody.DeliveryMan{
+			return shim.Error("terminateChain ERROR : The caller must be the current custodian!!")
+		}
 	*/
 
 	//FIXME SEE UP
-	if chainOfCustody.DeliveryMan != "admin"{
+	if chainOfCustody.DeliveryMan != "admin" {
 		return shim.Error("terminateChain ERROR : The caller must be the current custodian!!")
 	}
 	chainOfCustody.Status = RELEASED
@@ -1734,13 +1729,13 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	err = stub.PutState(COCKey, jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
-	}	
+	}
 
 	err = stub.SetEvent("terminateChain EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println("**** terminateChain EVENT: ", string(jsonCOC))
+	logger.Info("**** terminateChain EVENT: ", string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1772,12 +1767,12 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	if chainOfCustody.Status != IN_CUSTODY{
+	if chainOfCustody.Status != IN_CUSTODY {
 		return shim.Error("updateDocument ERROR: Asset's status is not IN_CUSTODY!!!")
 	}
 	chainOfCustody.DocumentId = args[1]
@@ -1792,12 +1787,12 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 		return shim.Error(err.Error())
 	}
 
-	//EVENT created	
-	err = stub.SetEvent("updateDocument EVENT:", jsonCOC )
+	//EVENT created
+	err = stub.SetEvent("updateDocument EVENT:", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println("*** updateDocument EVENT: ", string(jsonCOC))
+	logger.Info("*** updateDocument EVENT: ", string(jsonCOC))
 
 	return shim.Success(nil)
 }
@@ -1829,16 +1824,16 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 		return shim.Error(err.Error())
 	}
 
-	err = json.Unmarshal([]byte(chainOfCustodyBytes) , &chainOfCustody)
+	err = json.Unmarshal([]byte(chainOfCustodyBytes), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	/*
-	_, callerID, err = getTxCreatorInfo(stub)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+		_, callerID, err = getTxCreatorInfo(stub)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 	*/
 
 	//FIXME
@@ -1852,74 +1847,73 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	}
 	//jsonResp = "{\" **** getAssetDetails complete! ****\":\"" + string(jsonCOC) + "\"} "
 	jsonResp = string(jsonCOC)
-	fmt.Printf("Query Response:%s\n", jsonResp)
-	
-	return shim.Success([]byte(jsonResp))}
+	logger.Info("Query Response:%s\n", jsonResp)
 
+	return shim.Success([]byte(jsonResp))
+}
 
+func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
+	var COCKey string
+	var err2 error
+	var chainOfCustody *ChainOfCustody
+	//var COCarray []*ChainOfCustody
+	//var chainOfCustodyBytes []byte
+	var jsonCOC []byte
+	var jsonResp, jsonResponse string
+	//var history *HistoryQueryIteratorInterface
+	// Access control: Only an DCOT operatorcan invoke this transaction
+	//if !t.testMode && !isEnabled {
+	//	return shim.Error("Caller is not a DCOT operator.")
+	//}
+	logger.Debug("***getChainOfEvents***")		
 
-	func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
-		var COCKey string
-		var err2 error
-		var chainOfCustody *ChainOfCustody
-		//var COCarray []*ChainOfCustody
-		//var chainOfCustodyBytes []byte
-		var jsonCOC []byte
-		var jsonResp, jsonResponse string
-		//var history *HistoryQueryIteratorInterface
-		// Access control: Only an DCOT operatorcan invoke this transaction
-		//if !t.testMode && !isEnabled {
-		//	return shim.Error("Caller is not a DCOT operator.")
-		//}
-		fmt.Println("***getChainOfEvents***")		
+	if len(args) != 1 {
+		return shim.Error("getChainOfEvents ERROR: this method must want exactly one argument!!")
+	}
 
-		if len(args) != 1 {
-			return shim.Error("getChainOfEvents ERROR: this method must want exactly one argument!!")
+	COCKey, err2 = getCOCKey(stub, args[0])
+	if err2 != nil {
+		return shim.Error(err2.Error())
+	}
+
+	historyResponse, err := stub.GetHistoryForKey(COCKey)
+	if err!= nil {
+		return shim.Error(err.Error())
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	for historyResponse.HasNext(){
+		COCarray, err1 := historyResponse.Next()
+		if err1 != nil {
+			return shim.Error(err1.Error())
 		}
-	
-		COCKey, err2 = getCOCKey(stub, args[0])
-		if err2 != nil {
-			return shim.Error(err2.Error())
-		}
-	
-		historyResponse, err := stub.GetHistoryForKey(COCKey)
-		if err!= nil {
+		//logger.Debug("COCarray :", string(COCarray))
+		//jsonCOC, err2 = json.Marshal(&COCarray.Value)
+		err = json.Unmarshal([]byte(COCarray.Value) , &chainOfCustody)
+		if err != nil {
 			return shim.Error(err.Error())
 		}
-		var buffer bytes.Buffer
-		buffer.WriteString("[")
-
-		for historyResponse.HasNext(){
-			COCarray, err1 := historyResponse.Next()
-			if err1 != nil {
-				return shim.Error(err1.Error())
-			}
-			//fmt.Println("COCarray :", string(COCarray))
-			//jsonCOC, err2 = json.Marshal(&COCarray.Value)
-			err = json.Unmarshal([]byte(COCarray.Value) , &chainOfCustody)
-			if err != nil {
-				return shim.Error(err.Error())
-			}
-			jsonCOC, err2 = json.Marshal(&chainOfCustody)
-			if err2 != nil{
-				return shim.Error(err2.Error())
-			}
-			fmt.Println("jsonCOC :", string(jsonCOC))
-			buffer.WriteString(string(jsonCOC))
-			buffer.WriteString(",")
-			}
-		jsonResp = buffer.String()
-		subString := jsonResp[0:len(jsonResp)-1]
-		jsonResponse = subString+"]"
-		fmt.Printf("Query Response:%s\n", jsonResponse)
-		return shim.Success([]byte(jsonResponse)) 
-	}
+		jsonCOC, err2 = json.Marshal(&chainOfCustody)
+		if err2 != nil{
+			return shim.Error(err2.Error())
+		}
+		logger.Debug("jsonCOC :", string(jsonCOC))
+		buffer.WriteString(string(jsonCOC))
+		buffer.WriteString(",")
+		}
+	jsonResp = buffer.String()
+	subString := jsonResp[0:len(jsonResp)-1]
+	jsonResponse = subString+"]"
+	logger.Debug("Query Response:%s\n", jsonResponse)
+	return shim.Success([]byte(jsonResponse)) 
+}
 
 func main() {
 	twc := new(DcotWorkflowChaincode)
 	twc.testMode = true
 	err := shim.Start(twc)
 	if err != nil {
-		fmt.Printf("Error starting Chain of Custody chaincode: %s", err)
+		logger.Info("Error starting Chain of Custody chaincode: %s", err)
 	}
 }
