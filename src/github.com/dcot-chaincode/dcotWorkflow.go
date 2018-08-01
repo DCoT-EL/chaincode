@@ -1865,7 +1865,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 		//var COCarray []*ChainOfCustody
 		//var chainOfCustodyBytes []byte
 		var jsonCOC []byte
-		var jsonResp string
+		var jsonResp, jsonResponse string
 		//var history *HistoryQueryIteratorInterface
 		// Access control: Only an DCOT operatorcan invoke this transaction
 		//if !t.testMode && !isEnabled {
@@ -1886,9 +1886,9 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 		if err!= nil {
 			return shim.Error(err.Error())
 		}
-		 
-		
 		var buffer bytes.Buffer
+		buffer.WriteString("[")
+
 		for historyResponse.HasNext(){
 			COCarray, err1 := historyResponse.Next()
 			if err1 != nil {
@@ -1905,15 +1905,14 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 				return shim.Error(err2.Error())
 			}
 			fmt.Println("jsonCOC :", string(jsonCOC))
-
-			//buffer.WriteString(", \"Value\":")
 			buffer.WriteString(string(jsonCOC))
-			//buffer.WriteString("}")
-			
-		}
+			buffer.WriteString(",")
+			}
 		jsonResp = buffer.String()
-		fmt.Printf("Query Response:%s\n", jsonResp)
-		return shim.Success([]byte(jsonResp)) 
+		subString := jsonResp[0:len(jsonResp)-1]
+		jsonResponse = subString+"]"
+		fmt.Printf("Query Response:%s\n", jsonResponse)
+		return shim.Success([]byte(jsonResponse)) 
 	}
 
 func main() {
