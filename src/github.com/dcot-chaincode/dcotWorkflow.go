@@ -1583,6 +1583,11 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 		return shim.Error(err.Error())
 	}
 
+	err = stub.PutState(COCKey, chainOfCustodyBytes)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	chainOfCustody.Text = args[1]
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
@@ -1746,6 +1751,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
+	var jsonResp string 
 
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	if !t.testMode && !isEnabled {
@@ -1794,8 +1800,13 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	}
 	logger.Info("*** updateDocument EVENT: ", string(jsonCOC))
 
-	return shim.Success(nil)
+
+	jsonResp = string(jsonCOC)
+	logger.Info("Query Response:%s\n", jsonResp)
+	return shim.Success([]byte(jsonResp))
 }
+
+
 func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
 	var COCKey string
 	var err error
@@ -1905,7 +1916,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 	jsonResp = buffer.String()
 	subString := jsonResp[0:len(jsonResp)-1]
 	jsonResponse = subString+"]"
-	logger.Debug("Query Response:%s\n", jsonResponse)
+	logger.Debug("Query Response:%s\n"+jsonResponse)
 	return shim.Success([]byte(jsonResponse)) 
 }
 
