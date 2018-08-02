@@ -28,7 +28,6 @@ type ChainOfCustody struct {
 	CodeOwner                string `json:"codeOwner"`
 	Text                     string `json:"text"`
 	Status                   string `json:"status"`
-	Role					 string `json:"role"`
 }
 
 /*type TradeAgreement struct {
