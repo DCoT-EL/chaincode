@@ -42,7 +42,7 @@ func (t *DcotWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respon
 
 	// Upgrade Mode 1: leave ledger state as it was
 	if len(args) == 0 {
-		logger.Info("Args correctly!!!")
+		//logger.Info("Args correctly!!!")
 		return shim.Success(nil)
 	}
 
@@ -102,7 +102,7 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 	var err error
 	var isEnabled bool
 
-	logger.Info("DcotWorkflow Invoke")
+	logger.Info("DcotWorkflow Invoke\n")
 
 	if !t.testMode {
 		creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(stub)
@@ -1356,6 +1356,8 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	var err error
 	var jsonCOC []byte
 	var COCKey string
+	var callerRole, callerUID string
+
 	//var chaincodeStubInterface ChaincodeStubInterface
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	//if !t.testMode && !isEnabled {
@@ -1375,18 +1377,24 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 		return shim.Error(err.Error())
 	}
 	if chainOfCustody.DocumentId == "" || len(chainOfCustody.DocumentId) == 0 {
-		return shim.Error("initNewChain ERROR: Document ID must not be null or empty string!!")
+		return shim.Error("initNewChain ERROR: Document ID must not be null or empty string!!\n")
 
 	}
 	chainOfCustody.Id = guid.String()
 	chainOfCustody.Status = IN_CUSTODY
 
-	//_, callerID, err = getTxCreatorInfo(stub)
-	//if err != nil {
-	//	return shim.Error(err.Error())
-	//}
+	callerRole, callerUID, err = getTxCreatorInfo(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	logger.Info("caller_UID :"+ string(callerUID) +"\n")
+	logger.Info("caller_ROLE :"+ string(callerRole) +"\n")
 
-	chainOfCustody.DeliveryMan = "admin" //FIXME!!!! GESTIRE UTENZE PERMESSI!!!!!
+	if len(callerUID) == 0 {
+		return shim.Error("initNewChain ERROR: caller_UID is empty!!!\n")
+	}
+	chainOfCustody.DeliveryMan = string(callerUID)
+	logger.Info("initNewChain: field DelivaryMan: "+ string(callerUID) +"\n")
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -1417,9 +1425,10 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	var chainOfCustody *ChainOfCustody
 	var chainOfCustodyBytes []byte
 	var jsonCOC []byte
+	var callerRole, callerUID string
 
 	if len(args) != 2 {
-		return shim.Error("startTransfer ERROR: this method must want exactly two arguments!!")
+		return shim.Error("startTransfer ERROR: this method must want exactly two arguments!!\n")
 	}
 
 	COCKey, err = getCOCKey(stub, args[0])
@@ -1441,26 +1450,29 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 	}
 
 	if chainOfCustody.Status != IN_CUSTODY {
-		return shim.Error("startTransferAsset ERROR : Asset have not status IN_CUSTODY!!")
+		return shim.Error("startTransferAsset ERROR : Asset have not status IN_CUSTODY!!\n")
 	}
 
-	//_, callerID, err = getTxCreatorInfo(stub)
-	//if err != nil {
-	//	return shim.Error(err.Error())
-	//}
-	//logger.Info("CALLER_ID :"+ string(callerID) +" . \n")
+	callerRole, callerUID, err = getTxCreatorInfo(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	//logger.Info("caller_UID :"+ string(callerUID) +" . \n")
+	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	//if callerID != chainOfCustody.DeliveryMan{
+	if callerUID != chainOfCustody.DeliveryMan{
+		return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!\n")
+	}
+	logger.Info("startTransferAsset: Ok! Caller confirmed!!\n")
+
+	//FIXME SEE UP!!!!
+	//if chainOfCustody.DeliveryMan != "5a9654f5-ff72-49dd-9be3-b3b524228556" {
 	//	return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
 	//}
 
-	//FIXME SEE UP!!!!
-	if chainOfCustody.DeliveryMan != "admin" {
-		return shim.Error("startTransferAsset ERROR : The caller must be the current custodian!!")
-	}
-
 	chainOfCustody.Status = TRANSFER_PENDING
 	chainOfCustody.DeliveryMan = args[1]
+	logger.Info("startTransferAsset: New DeliveryMan: \n", chainOfCustody.DeliveryMan)
 	jsonCOC, err = json.Marshal(&chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())

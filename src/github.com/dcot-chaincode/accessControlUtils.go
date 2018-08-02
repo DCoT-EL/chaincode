@@ -23,32 +23,44 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
+
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
-	var mspid string
+
+	//var mspid string
 	var err error
-	var attrValue string
+	var attrValue1, attrValue2 string
 	var found bool
-	mspid, err = cid.GetMSPID(stub)
+
+	/*mspid, err = cid.GetMSPID(stub)
 	if err != nil {
 		fmt.Printf("Error getting MSP identity: %s\n", err.Error())
 		return "", "", err
-	}
+	}*/
 
-	attrValue, found, err = cid.GetAttributeValue(stub, "TOKEN")
-	
+	attrValue1, found, err = cid.GetAttributeValue(stub, ROLE)
 	if err != nil {
 		fmt.Printf("Error getting Attribute Value: %s\n", err.Error())
 		return "", "", err
 	}
 	if found == false {
-		fmt.Printf("Error getting Attribute Value NOT FOUND!!!")
+		fmt.Printf("Error getting ROLE --> NOT FOUND!!!\n")
 	//	err.Error()
 	//	return "", "", err
 	}
 
-	return mspid, attrValue , nil
-}
+	attrValue2, found, err = cid.GetAttributeValue(stub, UID)
+	if err != nil {
+		fmt.Printf("Error getting Attribute Value UID: %s\n", err.Error())
+		return "", "", err
+	}
+	if found == false {
+		fmt.Printf("Error getting UID --> NOT FOUND!!!\n")
+	//	err.Error()
+		return "", "", err
+	}
 
+	return attrValue1, attrValue2 , nil
+}
 /*
 // For now, just hardcode an ACL
 // We will support attribute checks in an upgrade

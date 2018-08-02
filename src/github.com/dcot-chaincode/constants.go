@@ -23,6 +23,12 @@ const (
 	RELEASED = "RELEASED"
 )
 
+// Utilis values //FIXME!!!!!
+
+const (
+	ROLE = "role"
+	UID = "uid"
+)
 // Key names
 /*
 const (
