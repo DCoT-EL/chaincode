@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FABRIC_DIR='/opt/hyperledger/configuration-network-fabric'
+FABRIC_DIR='/home/ubuntu/configuration-network-fabric'
 
 
 CHANNEL='ledgerchannel'
