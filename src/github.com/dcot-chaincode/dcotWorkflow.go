@@ -1634,8 +1634,6 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 		return shim.Error(err.Error())
 	}
 
-	//TODO: CHECK ROLE OF CALLER!!!!
-
 	err = stub.SetEvent("commentChain EVENT: ", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())

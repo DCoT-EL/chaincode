@@ -20,7 +20,7 @@ type ChainOfCustody struct {
 	Id                       string `json:"id"`
 	TrackingId               string `json:"trackingId"`
 	DocumentId               string `json:"documentId"`
-	WeightOfParcel           int    `json:"weightOfParcel"`
+	WeightOfParcel           float64    `json:"weightOfParcel"`
 	SortingCenterDestination string `json:"sortingCenterDestination"`
 	DistributionOfficeCode   string `json:"distributionOfficeCode"`
 	DistributionZone         string `json:"distributionZone"`
