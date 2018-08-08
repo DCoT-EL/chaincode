@@ -23,7 +23,6 @@ const (
 	RELEASED = "RELEASED"
 )
 
-// Utilis values //FIXME!!!!!
 
 const (
 	ROLE = "role"

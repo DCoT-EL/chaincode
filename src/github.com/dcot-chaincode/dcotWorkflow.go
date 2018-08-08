@@ -1588,7 +1588,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	// Access control: Only an DCOT operatorcan invoke this transaction
 	//if !t.testMode && !isEnabled {
 	//	return shim.Error("Caller is not a DCOT operator.")
-	//}
+	
 
 	//Check Args size is correct!!!
 
@@ -1633,6 +1633,8 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+	//TODO: CHECK ROLE OF CALLER!!!!
 
 	err = stub.SetEvent("commentChain EVENT: ", jsonCOC)
 	if err != nil {
@@ -1689,13 +1691,10 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	logger.Info("caller_UID :"+ string(callerUID) +" . \n")
-	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
+	logger.Info("caller_UID :"+ string(callerUID)+"\n")
+	logger.Info("caller_ROLE :"+ string(callerRole)+"\n")
 
-	if callerUID != chainOfCustody.DeliveryMan ||  callerRole != "dcot-operator"{
-		return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator!!\n")
-	}
-
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator"){
 	logger.Info("cancelTrasfer: Ok! Caller confirmed!!\n")
 
 	chainOfCustody.Status = IN_CUSTODY
@@ -1717,6 +1716,10 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	logger.Debug("***end cancelTrasfer***")
 
 	return shim.Success(nil)
+	}
+
+	return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator!!\n")
+
 }
 
 func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -1830,13 +1833,11 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	logger.Info("caller_UID :"+ string(callerUID) +" . \n")
-	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
-
-	if callerUID != chainOfCustody.DeliveryMan || callerRole != "dcot-operator"{
-		return shim.Error("updateDocument ERROR : The caller must be the current custodian or dcot-operator!!\n")
-	}
-
+	logger.Info("caller_UID :"+ string(callerUID) +". \n")
+	logger.Info("caller_ROLE :"+ string(callerRole) +". \n")
+	
+	
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator"){
 	logger.Info("updateDocument: Ok! Caller confirmed!!\n")
 
 	if chainOfCustody.Status != IN_CUSTODY {
@@ -1867,6 +1868,9 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	logger.Debug("***end updateDocument***")
 
 	return shim.Success([]byte(jsonResp))
+}
+return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator!!\n")
+
 }
 
 func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
