@@ -1,28 +1,32 @@
-/*
-Copyright IBM Corp. 2016 All Rights Reserved.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-		 http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-//Reference for cid library here https://github.com/hyperledger/fabric/blob/master/core/chaincode/lib/cid/README.md
 package main
 
 import (
 	//"crypto/x509"
 	"fmt"
-
+	"time"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
+func createEvent( stub shim.ChaincodeStubInterface, string caller, string role, string operation, ChainOfCustody chainCustody ) ( ChainOfCustody, error){
+
+	var err error
+	var chain ChainOfCustody
+
+	chain = chainCustody
+	t =: time.Now()
+	if( caller != nil || role != nil || operation != nil){
+		return err.Error("createEvent error: some argument are empty!!")
+	}
+	chain.Event = Event{
+		Caller : string(caller),
+		Role : string(role),
+		Operation : string(operation),
+		Moment : t.String(),
+	}
+	return chain
+}
+
 
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 
@@ -61,30 +65,6 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 
 	return attrValue1, attrValue2 , nil
 }
-/*
-// For now, just hardcode an ACL
-// We will support attribute checks in an upgrade
-
-func authenticateExportingEntityOrg(mspID string, certCN string) bool {
-	return (mspID == "ExportingEntityOrgMSP") && (certCN == "ca.exportingentityorg.trade.com")
-}
-
-func authenticateExporterOrg(mspID string, certCN string) bool {
-	return (mspID == "ExporterOrgMSP") && (certCN == "ca.exporterorg.trade.com")
-}
-
-func authenticateImporterOrg(mspID string, certCN string) bool {
-	return (mspID == "ImporterOrgMSP") && (certCN == "ca.importerorg.trade.com")
-}
-
-func authenticateCarrierOrg(mspID string, certCN string) bool {
-	return (mspID == "CarrierOrgMSP") && (certCN == "ca.carrierorg.trade.com")
-}
-
-func authenticateRegulatorOrg(mspID string, certCN string) bool {
-	return (mspID == "RegulatorOrgMSP") && (certCN == "ca.regulatororg.trade.com")
-}
-*/
 
 func isInvokerOperator(stub shim.ChaincodeStubInterface, attrName string) (bool, string, error) {
 	var found bool
