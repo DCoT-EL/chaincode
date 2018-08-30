@@ -2,44 +2,38 @@
 package main
 
 import (
-	//"crypto/x509"
 	"fmt"
 	"time"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
-func createEvent( stub shim.ChaincodeStubInterface, string caller, string role, string operation, ChainOfCustody chainCustody ) ( ChainOfCustody, error){
+
+
+func createEvent( stub shim.ChaincodeStubInterface, caller string, role string, operation string) ( Event, error){
 
 	var err error
-	var chain ChainOfCustody
+	var event Event
 
-	chain = chainCustody
-	t =: time.Now()
-	if( caller != nil || role != nil || operation != nil){
-		return err.Error("createEvent error: some argument are empty!!")
+	t := time.Now()
+	if( len(caller) == 0 || len(role) == 0 || len(operation) == 0){
+		fmt.Printf("createEvent error: some argument are empty!! %s\n", err.Error())
+		return event, err
 	}
-	chain.Event = Event{
-		Caller : string(caller),
-		Role : string(role),
-		Operation : string(operation),
-		Moment : t.String(),
-	}
-	return chain
+
+	event.Caller = caller
+	event.Role = role
+	event.Operation = operation
+	event.Moment = t.String()
+	return event, nil
 }
 
 
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 
-	//var mspid string
 	var err error
 	var attrValue1, attrValue2 string
 	var found bool
 
-	/*mspid, err = cid.GetMSPID(stub)
-	if err != nil {
-		fmt.Printf("Error getting MSP identity: %s\n", err.Error())
-		return "", "", err
-	}*/
 
 	attrValue1, found, err = cid.GetAttributeValue(stub, ROLE)
 	if err != nil {
@@ -59,7 +53,6 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	}
 	if found == false {
 		fmt.Printf("Error getting UID --> NOT FOUND!!!\n")
-	//	err.Error()
 		return "", "", err
 	}
 
