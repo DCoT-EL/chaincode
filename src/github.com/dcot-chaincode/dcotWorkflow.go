@@ -39,6 +39,7 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 	//var attrValue string
 	var err error
 	var isEnabled bool
+	var callerRole string
 
 	logger.Debug("DcotWorkflow Invoke\n")
 
@@ -49,8 +50,12 @@ func (t *DcotWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 			return shim.Error(err.Error())
 		}
 		logger.Info("DcotWorkflow Invoke by '', ''\n", creatorOrg, creatorCertIssuer)
+		callerRole, _, err = getTxCreatorInfo(stub)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
-		isEnabled, _, err = isInvokerOperator(stub, "dcot-operator")
+		isEnabled, _, err = isInvokerOperator(stub, callerRole)
 		if err != nil {
 			logger.Error("Error getting attribute info: \n", err.Error())
 			return shim.Error(err.Error())
@@ -336,9 +341,8 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	}
 	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	if callerRole !="dcot-operator"{
-		return shim.Error("completeTrasfer ERROR : The caller must be a dcot-operator or network admin!!\n")
-	}
+	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	
 	logger.Info("commentChain: Ok! Caller confirmed!!\n")
 
 	operation = "commentChain"
@@ -364,7 +368,10 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 
 	logger.Debug("***end commentChain***")
 
-	return shim.Success(nil)
+	return shim.Success(nil) 
+ 	}
+	return shim.Error("completeTrasfer ERROR : The caller must be a dcot-operator or network admin!!\n")
+
 }
 
 func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -408,7 +415,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}
 
-	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator"){
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator" ||callerRole != "dcot-admin"){
 	logger.Info("cancelTrasfer: Ok! Caller confirmed!!\n")
 	operation = "cancelTrasfer"
 	chainOfCustody.Status = IN_CUSTODY
@@ -437,7 +444,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 	return shim.Success(nil)
 	}
 
-	return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator!!\n")
+	return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or have a admin/operator role!!\n")
 
 }
 
@@ -482,6 +489,7 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	//logger.Info("caller_UID :"+ string(callerUID) +" . \n")
 
 	if callerUID != chainOfCustody.DeliveryMan {
 		return shim.Error("terminateChain ERROR : The caller must be the current!!\n")
@@ -548,12 +556,16 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
 	callerRole, callerUID, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator"){
-	//logger.Info("updateDocument: Ok! Caller confirmed!!\n")
+
+	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
+
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator" || callerRole != "dcot-admin"){
+	logger.Info("updateDocument: Ok! Caller confirmed!!\n")
 
 	if chainOfCustody.Status != IN_CUSTODY {
 		return shim.Error("updateDocument ERROR: Asset's status is not IN_CUSTODY!!!")
@@ -574,18 +586,19 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	//EVENT created
 	err = stub.SetEvent("updateDocument EVENT:", jsonCOC)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 	logger.Info("updateDocument EVENT: ", string(jsonCOC))
 	jsonResp = string(jsonCOC)
-	//logger.Info("Query Response:\n", jsonResp)
+	logger.Info("Query Response:\n", jsonResp)
 	logger.Debug("***end updateDocument***")
 
 	return shim.Success([]byte(jsonResp))
 }
-return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator!!\n")
+return shim.Error("cancelTrasfer ERROR : The caller must be the current custodian or dcot-operator/admin!!\n")
 
 }
 
@@ -618,14 +631,15 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+
 	callerRole, _, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	if callerRole !="dcot-operator"{
-		return shim.Error("getAssetDetails ERROR : The caller must be a dcot-operator or network admin!!\n")
-	}
+	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	
 	logger.Info("getAssetDetails: Ok! Caller confirmed!!\n")
 
 
@@ -638,7 +652,9 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 
 	logger.Debug("***end getAssetDetails***")
 
-	return shim.Success([]byte(jsonResp))
+	return shim.Success([]byte(jsonResp))}
+	return shim.Error("getAssetDetails ERROR : The caller must be a dcot-operator or network admin!!\n")
+
 }
 
 func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterface, isEnabled bool, args []string) pb.Response {
@@ -655,16 +671,15 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 	
 	if len(args) != 1 {
 		return shim.Error("getChainOfEvents ERROR: this method must want exactly one argument!!")
-	}
-    
+	}    
 	callerRole, _, err = getTxCreatorInfo(stub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	if callerRole !="dcot-operator"{
-		return shim.Error("getChainOfEvents ERROR : The caller must be a dcot-operator or network admin!!\n")
-	}
+	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	
 	logger.Info("getChainOfEvents: Ok! Caller confirmed!!\n")
 
 
@@ -685,6 +700,8 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 		if err1 != nil {
 			return shim.Error(err1.Error())
 		}
+		//logger.Debug("COCarray :", string(COCarray))
+		//jsonCOC, err2 = json.Marshal(&COCarray.Value)
 		err = json.Unmarshal([]byte(COCarray.Value), &chainOfCustody)
 		if err != nil {
 			return shim.Error(err.Error())
@@ -696,6 +713,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 		logger.Debug("jsonCOC :", string(jsonCOC))
 		buffer.WriteString(string(jsonCOC))
 		buffer.WriteString(",")
+		
 
 	}
 	jsonResp = buffer.String()
@@ -706,6 +724,9 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 	logger.Debug("***end getChainOfEvents***")
 
 	return shim.Success([]byte(jsonResponse))
+	}
+	return shim.Error("getChainOfEvents ERROR : The caller must be a dcot-operator or dcot-admin!!\n")
+
 }
 
 func main() {
