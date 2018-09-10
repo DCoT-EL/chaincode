@@ -341,7 +341,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 	}
 	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	if (callerRole == CALLER_ROLE_1|| callerRole == CALLER_ROLE_2){
 	
 	logger.Info("commentChain: Ok! Caller confirmed!!\n")
 
@@ -415,7 +415,7 @@ func (t *DcotWorkflowChaincode) cancelTrasfer(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}
 
-	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator" ||callerRole != "dcot-admin"){
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == CALLER_ROLE_1 ||callerRole != CALLER_ROLE_2){
 	logger.Info("cancelTrasfer: Ok! Caller confirmed!!\n")
 	operation = "cancelTrasfer"
 	chainOfCustody.Status = IN_CUSTODY
@@ -564,7 +564,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 
 	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole == "dcot-operator" || callerRole != "dcot-admin"){
+	if (callerUID == chainOfCustody.DeliveryMan ||  callerRole ==CALLER_ROLE_1 || callerRole != CALLER_ROLE_2){
 	logger.Info("updateDocument: Ok! Caller confirmed!!\n")
 
 	if chainOfCustody.Status != IN_CUSTODY {
@@ -638,7 +638,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 		return shim.Error(err.Error())
 	}
 
-	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	if (callerRole == CALLER_ROLE_1 || callerRole == CALLER_ROLE_2){
 	
 	logger.Info("getAssetDetails: Ok! Caller confirmed!!\n")
 
@@ -678,7 +678,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 	}
 	logger.Info("caller_ROLE :"+ string(callerRole) +" . \n")
 
-	if (callerRole =="dcot-operator" || callerRole == "dcot-admin"){
+	if (callerRole == CALLER_ROLE_1 || callerRole == CALLER_ROLE_2){
 	
 	logger.Info("getChainOfEvents: Ok! Caller confirmed!!\n")
 
@@ -713,8 +713,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 		logger.Debug("jsonCOC :", string(jsonCOC))
 		buffer.WriteString(string(jsonCOC))
 		buffer.WriteString(",")
-		
-
+	
 	}
 	jsonResp = buffer.String()
 	subString := jsonResp[0 : len(jsonResp)-1]

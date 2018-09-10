@@ -23,34 +23,17 @@ const (
 	RELEASED = "RELEASED"
 )
 
+// Utilis values //FIXME!!!!!
 
 const (
 	ROLE = "role"
 	UID = "uid"
 )
-// Key names
-/*
-const (
-	expKey		= "Exporter"
-	ebKey		= "ExportersBank"
-	expBalKey	= "ExportersAccountBalance"
-	impKey		= "Importer"
-	ibKey		= "ImportersBank"
-	impBalKey	= "ImportersAccountBalance"
-	carKey		= "Carrier"
-	raKey		= "RegulatoryAuthority"
-)
 
-// State values
-const (
-	REQUESTED	= "REQUESTED"
-	ISSUED		= "ISSUED"
-	ACCEPTED	= "ACCEPTED"
-)
 
-// Location values
 const (
-	SOURCE		= "SOURCE"
-	DESTINATION	= "DESTINATION"
+
+	CALLER_ROLE_1 = "dcot-admin"
+	CALLER_ROLE_2 = "dcot-operator"
+
 )
-*/
