@@ -700,7 +700,6 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 		if err1 != nil {
 			return shim.Error(err1.Error())
 		}
-		//logger.Debug("COCarray :", string(COCarray))
 		//jsonCOC, err2 = json.Marshal(&COCarray.Value)
 		err = json.Unmarshal([]byte(COCarray.Value), &chainOfCustody)
 		if err != nil {

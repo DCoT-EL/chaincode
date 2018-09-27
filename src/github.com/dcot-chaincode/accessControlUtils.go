@@ -2,6 +2,7 @@
 package main
 
 import (
+	//"crypto/x509"
 	"fmt"
 	"time"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
@@ -30,10 +31,16 @@ func createEvent( stub shim.ChaincodeStubInterface, caller string, role string, 
 
 func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) {
 
+	//var mspid string
 	var err error
 	var attrValue1, attrValue2 string
 	var found bool
 
+	/*mspid, err = cid.GetMSPID(stub)
+	if err != nil {
+		fmt.Printf("Error getting MSP identity: %s\n", err.Error())
+		return "", "", err
+	}*/
 
 	attrValue1, found, err = cid.GetAttributeValue(stub, ROLE)
 	if err != nil {
@@ -53,6 +60,7 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	}
 	if found == false {
 		fmt.Printf("Error getting UID --> NOT FOUND!!!\n")
+	//	err.Error()
 		return "", "", err
 	}
 
