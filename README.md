@@ -1,13 +1,12 @@
-# Chaincode
-
-####For install a HyperLedger Fabric network see this link [configuration-network-fabric](https://github.com/ascatox/configuration-network-fabric)
-###Download
+# DCoT Chaincode
+#### For install a HyperLedger Fabric network see this link [configuration-network-fabric](https://github.com/ascatox/configuration-network-fabric)
+### Download
 ```bash
 $ cd configuration-network-fabric/chaincode/go
 $ git clone https://github.com/DCoT-EL/chaincode.git
 ```
 
-###Istallation
+### Istallation
 
 For first installation:
 
