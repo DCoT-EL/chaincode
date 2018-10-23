@@ -1,2 +1,3 @@
 deploy.sh
 /src/github.com/dcot-chaincode/dcot-chaincode
+/dcot-chaincode/.dcotWorkflow.go.swp
