@@ -33,7 +33,8 @@ const (
 
 const (
 
-	CALLER_ROLE_1 = "dcot-admin"
-	CALLER_ROLE_2 = "dcot-operator"
+	CALLER_ROLE_1 = "administrator"
+	CALLER_ROLE_2 = "operator"
+	CALLER_ROLE_3 = "delivery-operator"
 
 )
