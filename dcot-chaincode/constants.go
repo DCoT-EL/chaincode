@@ -35,6 +35,6 @@ const (
 
 	CALLER_ROLE_1 = "administrator"
 	CALLER_ROLE_2 = "operator"
-	CALLER_ROLE_3 = "delivery-operator"
+	//CALLER_ROLE_3 = "delivery-operator"
 
 )
