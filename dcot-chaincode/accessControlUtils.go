@@ -1,8 +1,6 @@
-
 package main
 
 import (
-	//"crypto/x509"
 	"fmt"
 	"time"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
@@ -63,7 +61,6 @@ func getTxCreatorInfo(stub shim.ChaincodeStubInterface) (string, string, error) 
 	//	err.Error()
 		return "", "", err
 	}
-
 	return attrValue1, attrValue2 , nil
 }
 
