@@ -365,6 +365,7 @@ func (t *DcotWorkflowChaincode) commentChain(stub shim.ChaincodeStubInterface, i
 		logger.Info("commentChain EVENT: ", string(byteCOC))
 		return shim.Success(nil)
 	}
+	logger.Error("completeTrasfer ERROR : the user's role is not compatible with this operation!")
 	return shim.Error("completeTrasfer ERROR : the user's role is not compatible with this operation!\n")
 
 }
@@ -581,6 +582,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 
 		return shim.Success([]byte(jsonResp))
 	}
+	logger.Error("cancelTrasfer ERROR : the user's role is not compatible with this operation!!\n")
 	return shim.Error("cancelTrasfer ERROR : the user's role is not compatible with this operation!!\n")
 
 }
@@ -634,6 +636,7 @@ func (t *DcotWorkflowChaincode) getAssetDetails(stub shim.ChaincodeStubInterface
 
 		return shim.Success([]byte(jsonResp))
 	}
+	logger.Error("getAssetDetails ERROR : the user's role is not compatible with this operation!")
 	return shim.Error("getAssetDetails ERROR : the user's role is not compatible with this operation!\n")
 
 }
@@ -702,6 +705,7 @@ func (t *DcotWorkflowChaincode) getChainOfEvents(stub shim.ChaincodeStubInterfac
 
 		return shim.Success([]byte(jsonResponse))
 	}
+	logger.Error("getChainOfEvents ERROR : the user's role is not compatible with this operation!\n")
 	return shim.Error("getChainOfEvents ERROR : the user's role is not compatible with this operation!\n")
 
 }
