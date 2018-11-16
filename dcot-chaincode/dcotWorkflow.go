@@ -186,12 +186,6 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 		logger.Error("startTransfer ERROR: Access denied for a Admin!!\n")
 		return shim.Error("startTransfer ERROR: Access denied for a Admin!!!")
 	}
-	if callerUID != chainOfCustody.DeliveryMan {
-		logger.Error("startTransfer ERROR : The caller must be the current custodian!!\n")
-		return shim.Error("startTransfer ERROR : The caller must be the current custodian!!")
-	}
-	
-	
 	
 	COCKey, err = getCOCKey(stub, args[0])
 	if err != nil {
@@ -208,7 +202,11 @@ func (t *DcotWorkflowChaincode) startTransfer(stub shim.ChaincodeStubInterface, 
 		logger.Error("startTransfer ERROR: json.Unmarshal()\n")
 		return shim.Error(err.Error())
 	}
-	
+	logger.Debug(string(chainOfCustodyBytes))
+	if callerUID != chainOfCustody.DeliveryMan {
+		logger.Error("startTransfer ERROR : The caller must be the current custodian!!\n")
+		return shim.Error("startTransfer ERROR : The caller must be the current custodian!!")
+	}
 	if chainOfCustody.Status != IN_CUSTODY {
 		logger.Error("startTransfer ERROR: Asset have not status IN_CUSTODY!!!\n")
 		return shim.Error("startTransfer ERROR : Asset have not status IN_CUSTODY!!\n")
@@ -293,6 +291,7 @@ func (t *DcotWorkflowChaincode) completeTrasfer(stub shim.ChaincodeStubInterface
 		logger.Error("completeTrasfer ERROR: : The caller must be the current custodian!!\n")
 		return shim.Error("completeTrasfer ERROR : The caller must be the current custodian!!")
 	}
+
 	logger.Info("completeTrasfer: Ok! Caller confirmed!!\n")
 	if chainOfCustody.Status != TRANSFER_PENDING {
 		logger.Error("completeTrasfer ERROR : Asset have not status TRANSFER_PENDING!!\n")
@@ -531,42 +530,44 @@ func (t *DcotWorkflowChaincode) terminateChain(stub shim.ChaincodeStubInterface,
 		logger.Error("terminateChain ERROR: getTxCreatorInfo\n")
 		return shim.Error(err.Error())
 	}
-	
-	if callerUID != chainOfCustody.DeliveryMan  || callerRole != CALLER_ROLE_1{
-		logger.Error("terminateChain ERROR : The caller must be the current custodian ora have a administrator role!!\n")
-		return shim.Error("terminateChain ERROR : The caller must be the current custodian ora have a administrator role!!\n")
-	}
-	logger.Info("terminateChain: Ok! Caller confirmed!!\n")
-
-	chainOfCustody.Status = RELEASED
-	event, err = createEvent(stub, callerUID, callerRole, operation)
-	if err != nil {
-		logger.Error("terminateChain ERROR: createEvent()\n")
-		return shim.Error(err.Error())
-	}
-	chainOfCustody.Event = event
-	byteCOC, err = json.Marshal(&chainOfCustody)
-	if err != nil {
-		logger.Error("terminateChain ERROR: json.Marshal()\n")
-		return shim.Error(err.Error())
+	if callerRole == CALLER_ROLE_0 || callerRole == CALLER_ROLE_2{
+		logger.Error("terminateChain ERROR : Access denied for member or operator!!\n")
+		return shim.Error("terminateChain ERROR : Access denied for member or operator!!")
 	}
 
-	err = stub.PutState(COCKey, byteCOC)
-	if err != nil {
-		logger.Error("terminateChain ERROR: createEPutStatevent()\n")
-		return shim.Error(err.Error())
-	}
+	if callerRole == CALLER_ROLE_1 || callerUID == chainOfCustody.DeliveryMan {
+		
+		logger.Info("terminateChain: Ok! Caller confirmed!!\n")
 
-	err = stub.SetEvent("terminateChain EVENT: ", byteCOC)
-	if err != nil {
-		logger.Error("terminateChain ERROR: SetEvent()\n")
-		return shim.Error(err.Error())
-	}
-	logger.Info("terminateChain EVENT: ", string(byteCOC))
+		chainOfCustody.Status = RELEASED
+		event, err = createEvent(stub, callerUID, callerRole, operation)
+		if err != nil {
+			logger.Error("terminateChain ERROR: createEvent()\n")
+			return shim.Error(err.Error())
+		}
+		chainOfCustody.Event = event
+		byteCOC, err = json.Marshal(&chainOfCustody)
+		if err != nil {
+			logger.Error("terminateChain ERROR: json.Marshal()\n")
+			return shim.Error(err.Error())
+		}
+		err = stub.PutState(COCKey, byteCOC)
+		if err != nil {
+			logger.Error("terminateChain ERROR: createEPutStatevent()\n")
+			return shim.Error(err.Error())
+		}
+		err = stub.SetEvent("terminateChain EVENT: ", byteCOC)
+		if err != nil {
+			logger.Error("terminateChain ERROR: SetEvent()\n")
+			return shim.Error(err.Error())
+		}
+		logger.Info("terminateChain EVENT: ", string(byteCOC))
 
-	return shim.Success(nil)
+		return shim.Success(nil)
+	}
+	logger.Error("terminateChain ERROR : The caller must be the current custodian ora have a administrator role!!\n")
+	return shim.Error("terminateChain ERROR : The caller must be the current custodian ora have a administrator role!!")
 }
-
 
 
 
