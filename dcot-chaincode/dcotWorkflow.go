@@ -102,19 +102,14 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
 	err = json.Unmarshal([]byte(args[0]), &chainOfCustody)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
-
 	if chainOfCustody.DocumentId == "" || len(chainOfCustody.DocumentId) == 0 {
 		logger.Error("initNewChain ERROR: Document ID must not be null or empty string!\n")
 		return shim.Error("initNewChain ERROR: Document ID must not be null or empty string!!\n")
-
 	}
-
 	chainOfCustody.Id = guid.String()
 	chainOfCustody.Status = IN_CUSTODY
 	operation = "initNewChain"
@@ -123,19 +118,15 @@ func (t *DcotWorkflowChaincode) initNewChain(stub shim.ChaincodeStubInterface, i
 		logger.Error("initNewChain ERROR: getTxCreatorInfo()...\n")
 		return shim.Error(err.Error())
 	}
-	
 	if callerRole != CALLER_ROLE_0 {
 		logger.Error("initNewChain ERROR: the user's role must be a member\n")
 		return shim.Error("initNewChain ERROR: the user's role must be a member\n")
-
 	}
 	if len(callerUID) == 0 {
 		logger.Error("initNewChain ERROR: caller_UID is empty!!!\n")
 		return shim.Error("initNewChain ERROR: caller_UID is empty!!!\n")
 	}
 	chainOfCustody.DeliveryMan = string(callerUID)
-
-
 	event, err = createEvent(stub, callerUID, callerRole, operation)
 	if err != nil {
 		logger.Error("initNewChain ERROR: createEvent()\n")
@@ -620,7 +611,7 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 		logger.Info("updateDocument ERROR: getTxCreatorInfo()\n")
 		return shim.Error(err.Error())
 	}
-	if callerUID == chainOfCustody.DeliveryMan || callerRole == CALLER_ROLE_1{
+	if callerRole == CALLER_ROLE_1{
 		logger.Info("updateDocument: Ok! Caller confirmed!!\n")
 
 		if chainOfCustody.Status != IN_CUSTODY {
@@ -658,6 +649,8 @@ func (t *DcotWorkflowChaincode) updateDocument(stub shim.ChaincodeStubInterface,
 	logger.Error("cancelTrasfer ERROR : the user's role is not compatible with this operation!!\n")
 	return shim.Error("cancelTrasfer ERROR : the user's role is not compatible with this operation!!\n")
 }
+
+
 
 
 
