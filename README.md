@@ -6,7 +6,7 @@ $ cd configuration-network-fabric/chaincode/go
 $ git clone https://github.com/DCoT-EL/chaincode.git
 ```
 
-### Istallation
+### Installation
 
 For first installation:
 
